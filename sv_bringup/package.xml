@@ -1,7 +1,7 @@
 <package>
-  <name>serwo_receptors</name>
+  <name>sv_bringup</name>
   <version>0.0.1</version>
-  <description>Serwo_Receptors</description>
+  <description>servo-vision bringup</description>
   <maintainer email="bartswis@gmail.com">Bartosz Świstak</maintainer>
 
   <license>BSD</license>

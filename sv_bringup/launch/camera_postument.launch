@@ -1,26 +1,26 @@
 <launch>
-  <arg name="camera_track_serial" default="14180973" />
+  <arg name="camera_postument_serial" default="13481977" />
   <arg name="calibrated" default="0" />
 
-  <group ns="camera_track">
+  <group ns="camera_postument">
     <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
 
     <node pkg="nodelet" type="nodelet" name="camera_nodelet"
           args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
-      <param name="frame_id" value="camera_track" />
-      <param name="serial" value="$(arg camera_track_serial)" />
-      <param name="camera_track_info_url" if="$(arg calibrated)"
-             value="file://$(env HOME)/.ros/camera_track_info/$(arg camera_track_serial).yaml" />
+      <param name="frame_id" value="camera_postument" />
+      <param name="serial" value="$(arg camera_postument_serial)" />
+      <param name="camera_postument_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_postument_info/$(arg camera_postument_serial).yaml" />
     </node>
 
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
 
-    <node pkg="serwo_receptors" type="vr_camera" name="vr_camera_track">
+    <node pkg="sv_receptors" type="vr_camera" name="vr_camera_postument">
       <rosparam>
-        subscriber: /camera_track/image_color
-        publisher: track_camera_object_position
+        subscriber: /camera_postument/image_color
+        publisher: postument_camera_object_position
         camera_fx: 1386.809134
         camera_fy: 1380.870643
         camera_cx: 664.042012
