@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 
     camera_matrix = cv::Mat::zeros(3,3, CV_64FC1);
     camera_matrix.ptr<double>(0)[0] = camera_fx;
-    camera_matrix.ptr<double>(1)[1] = camera_fx;
+    camera_matrix.ptr<double>(1)[1] = camera_fy;
     camera_matrix.ptr<double>(0)[2] = camera_cx;
     camera_matrix.ptr<double>(1)[2] = camera_cy;
     camera_matrix.ptr<double>(2)[2] = 1;
