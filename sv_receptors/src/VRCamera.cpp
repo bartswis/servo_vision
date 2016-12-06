@@ -11,6 +11,8 @@ static const char WINDOW_WORK[] = "Work";
 static const char WINDOW_ORG[] = "Orginal";
 static const char WINDOW_OUT[] = "Out";
 
+static bool view = false;
+
 cv::Mat camera_matrix;
 std::vector<double> camera_distortion;
 ros::Publisher chatter_pub;
@@ -21,7 +23,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {   
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8"  );
         cv::Mat sourceImage = cv_ptr->image.clone();
-        cv::imshow(WINDOW_ORG, sourceImage);
 
         cv::Mat undistImage;
         cv::Mat new_camera_matrix = camera_matrix.clone();
@@ -32,12 +33,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         double cx = new_camera_matrix.ptr<double>(0)[2];
         double cy = new_camera_matrix.ptr<double>(1)[2];
 
-
         cv::Mat grayImage;
         cv::cvtColor(undistImage, grayImage, cv::COLOR_BGR2GRAY);
     
         cv::Mat thresholdImage;
-        cv::threshold(grayImage, thresholdImage, 100, 255, cv::THRESH_BINARY);
+        cv::threshold(grayImage, thresholdImage, 60, 255, cv::THRESH_BINARY);
 
         cv::Mat erodeImage;
         cv::erode(thresholdImage, erodeImage, cv::Mat(), cv::Point(-1, -1), 6, cv::BORDER_DEFAULT, 1);
@@ -45,7 +45,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         cv::Mat dilateImage;
         cv::dilate(erodeImage, dilateImage, cv::Mat(), cv::Point(-1, -1), 4, cv::BORDER_DEFAULT, 1);
 
-        cv::imshow(WINDOW_WORK, dilateImage);
 
         cv::Mat countMap = dilateImage.clone();
 
@@ -86,10 +85,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
                 if (r > minR)
                 {
-                    cv::drawContours(cv_ptr->image, contours, i, CV_RGB(255, 0, 255));
-                    cv::line(cv_ptr->image, cv::Point(cx-10, cy), cv::Point(cx+10, cy), CV_RGB(255, 0, 255), 1, 8, 0);
-                    cv::line(cv_ptr->image, cv::Point(cx, cy-10), cv::Point(cx, cy+10), CV_RGB(255, 0, 255), 1, 8, 0);
-
                     minEnclosingCircle(contours[i], center, radius );
 
                     double f = (fx + fy)/2;
@@ -106,6 +101,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
                     }
                     //ROS_INFO("circle, M7 = %f , pix_area = %f, pix_x = %f, pix_y = %f, h = %f, dx = %f, dy = %f", M7, area, center.x, center.y, h, dx, dy);
                     ++count;
+
+                    if (view)
+                    {
+                        cv::drawContours(cv_ptr->image, contours, i, CV_RGB(255, 0, 255));
+                        cv::line(cv_ptr->image, cv::Point(cx-10, cy), cv::Point(cx+10, cy), CV_RGB(255, 0, 255), 1, 8, 0);
+                        cv::line(cv_ptr->image, cv::Point(cx, cy-10), cv::Point(cx, cy+10), CV_RGB(255, 0, 255), 1, 8, 0);
+                    }
                 }
             }
         }
@@ -116,8 +118,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         msg.data = ss.str();
         chatter_pub.publish(msg);
 
-        cv::imshow(WINDOW_OUT, cv_ptr->image);
-        cv::waitKey(30);
+        if (view)
+        {
+            cv::imshow(WINDOW_ORG, sourceImage);
+            cv::imshow(WINDOW_WORK, dilateImage);
+            cv::imshow(WINDOW_OUT, cv_ptr->image);
+            cv::waitKey(1);
+        }
     }
     catch (cv_bridge::Exception& e)
     {
@@ -136,6 +143,7 @@ int main(int argc, char **argv)
     nh.getParam("camera_cx", camera_cx);
     nh.getParam("camera_cy", camera_cy);
     nh.getParam("camera_distortion", camera_distortion);
+    nh.getParam("view", view);
 
     camera_matrix = cv::Mat::zeros(3,3, CV_64FC1);
     camera_matrix.ptr<double>(0)[0] = camera_fx;
@@ -144,10 +152,13 @@ int main(int argc, char **argv)
     camera_matrix.ptr<double>(1)[2] = camera_cy;
     camera_matrix.ptr<double>(2)[2] = 1;
 
-    cv::namedWindow(WINDOW_ORG);
-    cv::namedWindow(WINDOW_WORK);
-    cv::namedWindow(WINDOW_OUT);
-    cv::startWindowThread();
+    if (view)
+    {
+        cv::namedWindow(WINDOW_ORG);
+        cv::namedWindow(WINDOW_WORK);
+        cv::namedWindow(WINDOW_OUT);
+        cv::startWindowThread();
+    }
 
     std::string subscriber;
     nh.getParam("subscriber", subscriber);
@@ -159,7 +170,11 @@ int main(int argc, char **argv)
     chatter_pub = nh.advertise<std_msgs::String>(publisher, 1);
 
     ros::spin();
-    cv::destroyWindow(WINDOW_ORG);
-    cv::destroyWindow(WINDOW_OUT);
-    cv::destroyWindow(WINDOW_WORK);
+
+    if (view)
+    {
+        cv::destroyWindow(WINDOW_ORG);
+        cv::destroyWindow(WINDOW_OUT);
+        cv::destroyWindow(WINDOW_WORK);
+    }
 }

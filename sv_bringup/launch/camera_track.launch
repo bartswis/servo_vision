@@ -7,7 +7,7 @@
     <node pkg="nodelet" type="nodelet" name="camera_nodelet"
           args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
       <param name="frame_id" value="t_c_optical_frame" />
-      <param name="serial" value="14180973 />
+      <param name="serial" value="14180973" />
       <param name="camera_track_info_url" if="$(arg calibrated)"
              value="file://$(env HOME)/.ros/camera_track_info/14180973.yaml" />
       <param name="frame_rate" value="30.0" />
@@ -25,6 +25,7 @@
       <rosparam>
         subscriber: /camera_track/image_color
         publisher: track_camera_object_position
+        view: false
         camera_fx: 1945.727502
         camera_fy: 1930.055740
         camera_cx: 626.225924

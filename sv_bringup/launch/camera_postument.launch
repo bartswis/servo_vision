@@ -25,6 +25,7 @@
       <rosparam>
         subscriber: /camera_postument/image_color
         publisher: postument_camera_object_position
+        view: false
         camera_fx: 1240.563214
         camera_fy: 1236.069821
         camera_cx: 619.014122
