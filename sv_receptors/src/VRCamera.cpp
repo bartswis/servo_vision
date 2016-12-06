@@ -14,16 +14,19 @@ static const char WINDOW_OUT[] = "Out";
 static bool view = false;
 static bool undistort = false;
 
-cv::Mat camera_matrix;
-std::vector<double> camera_distortion;
 ros::Publisher chatter_pub;
 double fx, fy, cx, cy;
 
-void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::CameraInfoConstPtr& info)
 {
     try
     {   
-        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8"  );
+        fx = info->K[0];
+        fy = info->K[4];
+        cx = info->K[2];
+        cy = info->K[5];
+        
+        cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(in_msg, "bgr8"  );
         cv::Mat sourceImage = cv_ptr->image.clone();
         
         cv::Mat grayImage;
@@ -33,6 +36,15 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
         if (undistort)
         {
+            cv::Mat camera_matrix = cv::Mat::zeros(3,3, CV_64FC1);
+            camera_matrix.ptr<double>(0)[0] = fx;
+            camera_matrix.ptr<double>(1)[1] = fy;
+            camera_matrix.ptr<double>(0)[2] = cx;
+            camera_matrix.ptr<double>(1)[2] = cy;
+            camera_matrix.ptr<double>(2)[2] = 1;
+
+            std::vector<double> camera_distortion = info->D;;
+
             cv::Mat undistImage;
             cv::Mat new_camera_matrix = camera_matrix.clone();
             cv::undistort(sourceImage, undistImage, camera_matrix, cv::Mat(camera_distortion), new_camera_matrix);
@@ -117,11 +129,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
             }
         }
 
-        std_msgs::String msg;
+        std_msgs::String out_msg;
         std::stringstream ss;
         ss << output;
-        msg.data = ss.str();
-        chatter_pub.publish(msg);
+        out_msg.data = ss.str();
+        chatter_pub.publish(out_msg);
 
         if (view)
         {
@@ -133,7 +145,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     catch (cv_bridge::Exception& e)
     {
-        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", in_msg->encoding.c_str());
     }
 }
 
@@ -142,26 +154,8 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "vr_camera");
     ros::NodeHandle nh("~");
 
-    double camera_fx, camera_fy, camera_cx, camera_cy;
-    nh.getParam("camera_fx", camera_fx);
-    nh.getParam("camera_fy", camera_fy);
-    nh.getParam("camera_cx", camera_cx);
-    nh.getParam("camera_cy", camera_cy);
-    nh.getParam("camera_distortion", camera_distortion);
     nh.getParam("view", view);
     nh.getParam("undistort", undistort);
-
-    camera_matrix = cv::Mat::zeros(3,3, CV_64FC1);
-    camera_matrix.ptr<double>(0)[0] = camera_fx;
-    camera_matrix.ptr<double>(1)[1] = camera_fy;
-    camera_matrix.ptr<double>(0)[2] = camera_cx;
-    camera_matrix.ptr<double>(1)[2] = camera_cy;
-    camera_matrix.ptr<double>(2)[2] = 1;
-
-    fx = camera_fx;
-    fy = camera_fy;
-    cx = camera_cx;
-    cy = camera_cy;
 
     if (view)
     {
@@ -174,7 +168,7 @@ int main(int argc, char **argv)
     std::string subscriber;
     nh.getParam("subscriber", subscriber);
     image_transport::ImageTransport it(nh);
-    image_transport::Subscriber sub = it.subscribe(subscriber, 1, imageCallback);
+    image_transport::CameraSubscriber sub = it.subscribeCamera(subscriber, 1, imageCallback);
 
     std::string publisher;
     nh.getParam("publisher", publisher);

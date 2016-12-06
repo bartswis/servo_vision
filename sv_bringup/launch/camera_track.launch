@@ -27,11 +27,6 @@
         publisher: track_camera_object_position
         view: false
         undistort: false
-        camera_fx: 1945.727502
-        camera_fy: 1930.055740
-        camera_cx: 626.225924
-        camera_cy: 669.285322
-        camera_distortion: [-0.470603, 0.396404, -0.018308, -0.001757, 0.000000]
       </rosparam>
     </node>
 

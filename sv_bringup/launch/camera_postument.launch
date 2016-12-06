@@ -27,11 +27,6 @@
         publisher: postument_camera_object_position
         view: true
         undistort: true
-        camera_fx: 1240.563214
-        camera_fy: 1236.069821
-        camera_cx: 619.014122
-        camera_cy: 547.562770
-        camera_distortion: [-0.411348, 0.187733, 0.002984, 0.000523, 0.000000]
       </rosparam>
     </node>
 
