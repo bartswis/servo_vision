@@ -1,5 +1,4 @@
 <launch>
-  <arg name="camera_track_serial" default="14180973" />
   <arg name="calibrated" default="0" />
 
   <group ns="camera_track">
@@ -7,10 +6,15 @@
 
     <node pkg="nodelet" type="nodelet" name="camera_nodelet"
           args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
-      <param name="frame_id" value="camera_track" />
-      <param name="serial" value="$(arg camera_track_serial)" />
+      <param name="frame_id" value="t_c_optical_frame" />
+      <param name="serial" value="14180973 />
       <param name="camera_track_info_url" if="$(arg calibrated)"
-             value="file://$(env HOME)/.ros/camera_track_info/$(arg camera_track_serial).yaml" />
+             value="file://$(env HOME)/.ros/camera_track_info/14180973.yaml" />
+      <param name="frame_rate" value="30.0" />
+      <param name="auto_gain" value="False" />
+      <param name="gain" value="20" />
+      <param name="auto_shutter" value="False" />
+      <param name="shutter_speed" value="0.005" />
     </node>
 
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
@@ -21,11 +25,11 @@
       <rosparam>
         subscriber: /camera_track/image_color
         publisher: track_camera_object_position
-        camera_fx: 1386.809134
-        camera_fy: 1380.870643
-        camera_cx: 664.042012
-        camera_cy: 515.560012
-        camera_distortion: [-0.471320, 0.297339, 0.003023, -0.004239, 0.000000]
+        camera_fx: 1945.727502
+        camera_fy: 1930.055740
+        camera_cx: 626.225924
+        camera_cy: 669.285322
+        camera_distortion: [-0.470603, 0.396404, -0.018308, -0.001757, 0.000000]
       </rosparam>
     </node>
 
