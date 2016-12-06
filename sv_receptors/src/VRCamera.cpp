@@ -12,10 +12,12 @@ static const char WINDOW_ORG[] = "Orginal";
 static const char WINDOW_OUT[] = "Out";
 
 static bool view = false;
+static bool undistort = false;
 
 cv::Mat camera_matrix;
 std::vector<double> camera_distortion;
 ros::Publisher chatter_pub;
+double fx, fy, cx, cy;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -23,31 +25,34 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     {   
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(msg, "bgr8"  );
         cv::Mat sourceImage = cv_ptr->image.clone();
-
-        cv::Mat undistImage;
-        cv::Mat new_camera_matrix = camera_matrix.clone();
-        cv::undistort(sourceImage, undistImage, camera_matrix, cv::Mat(camera_distortion), new_camera_matrix);
-        cv_ptr->image = undistImage;
-        double fx = new_camera_matrix.ptr<double>(0)[0];
-        double fy = new_camera_matrix.ptr<double>(1)[1];
-        double cx = new_camera_matrix.ptr<double>(0)[2];
-        double cy = new_camera_matrix.ptr<double>(1)[2];
-
+        
         cv::Mat grayImage;
-        cv::cvtColor(undistImage, grayImage, cv::COLOR_BGR2GRAY);
-    
         cv::Mat thresholdImage;
-        cv::threshold(grayImage, thresholdImage, 60, 255, cv::THRESH_BINARY);
-
         cv::Mat erodeImage;
-        cv::erode(thresholdImage, erodeImage, cv::Mat(), cv::Point(-1, -1), 6, cv::BORDER_DEFAULT, 1);
-
         cv::Mat dilateImage;
+
+        if (undistort)
+        {
+            cv::Mat undistImage;
+            cv::Mat new_camera_matrix = camera_matrix.clone();
+            cv::undistort(sourceImage, undistImage, camera_matrix, cv::Mat(camera_distortion), new_camera_matrix);
+            cv_ptr->image = undistImage;
+            fx = new_camera_matrix.ptr<double>(0)[0];
+            fy = new_camera_matrix.ptr<double>(1)[1];
+            cx = new_camera_matrix.ptr<double>(0)[2];
+            cy = new_camera_matrix.ptr<double>(1)[2];
+            cv::cvtColor(undistImage, grayImage, cv::COLOR_BGR2GRAY);
+        }
+        else
+        {
+            cv::cvtColor(sourceImage, grayImage, cv::COLOR_BGR2GRAY);
+        }
+
+        cv::threshold(grayImage, thresholdImage, 60, 255, cv::THRESH_BINARY);
+        cv::erode(thresholdImage, erodeImage, cv::Mat(), cv::Point(-1, -1), 6, cv::BORDER_DEFAULT, 1);
         cv::dilate(erodeImage, dilateImage, cv::Mat(), cv::Point(-1, -1), 4, cv::BORDER_DEFAULT, 1);
 
-
         cv::Mat countMap = dilateImage.clone();
-
         cv::Mat emptyImage;
         cv::threshold(grayImage, emptyImage, 255, 255, cv::THRESH_BINARY);
 
@@ -144,6 +149,7 @@ int main(int argc, char **argv)
     nh.getParam("camera_cy", camera_cy);
     nh.getParam("camera_distortion", camera_distortion);
     nh.getParam("view", view);
+    nh.getParam("undistort", undistort);
 
     camera_matrix = cv::Mat::zeros(3,3, CV_64FC1);
     camera_matrix.ptr<double>(0)[0] = camera_fx;
@@ -151,6 +157,11 @@ int main(int argc, char **argv)
     camera_matrix.ptr<double>(0)[2] = camera_cx;
     camera_matrix.ptr<double>(1)[2] = camera_cy;
     camera_matrix.ptr<double>(2)[2] = 1;
+
+    fx = camera_fx;
+    fy = camera_fy;
+    cx = camera_cx;
+    cy = camera_cy;
 
     if (view)
     {

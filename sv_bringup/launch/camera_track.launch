@@ -26,6 +26,7 @@
         subscriber: /camera_track/image_color
         publisher: track_camera_object_position
         view: false
+        undistort: false
         camera_fx: 1945.727502
         camera_fy: 1930.055740
         camera_cx: 626.225924
