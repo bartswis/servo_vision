@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "geometry_msgs/Pose.h"
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
@@ -21,6 +21,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
 {
     try
     {   
+        geometry_msgs::Pose output;
+
         fx = info->K[0];
         fy = info->K[4];
         cx = info->K[2];
@@ -72,7 +74,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
         cv::findContours(countMap, contours, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
 
         cv::Point2f center(0.f, 0.f);
-        cv::Point3f output(0.f, 0.f, 0.f);
         float radius = 20.f;
 
         int count = 0;
@@ -112,9 +113,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
                     if(area > maxArea)
                     {
                         maxArea = area;
-                        output.x = dx;
-                        output.y = dy;
-                        output.z = h;
+                        output.position.x = dx;
+                        output.position.y = dy;
+                        output.position.z = h;
+                        output.orientation.x = 0;
+                        output.orientation.y = 0;
+                        output.orientation.z = 0;
+                        output.orientation.w = 1;
+
                     }
                     //ROS_INFO("circle, M7 = %f , pix_area = %f, pix_x = %f, pix_y = %f, h = %f, dx = %f, dy = %f", M7, area, center.x, center.y, h, dx, dy);
                     ++count;
@@ -128,12 +134,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
                 }
             }
         }
-
-        std_msgs::String out_msg;
-        std::stringstream ss;
-        ss << output;
-        out_msg.data = ss.str();
-        chatter_pub.publish(out_msg);
+        chatter_pub.publish(output);
 
         if (view)
         {
@@ -145,7 +146,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
     }
     catch (cv_bridge::Exception& e)
     {
-        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", in_msg->encoding.c_str());
+        ROS_INFO("Could not convert from '%s' to 'bgr8'.", in_msg->encoding.c_str());
     }
 }
 
@@ -172,7 +173,7 @@ int main(int argc, char **argv)
 
     std::string publisher;
     nh.getParam("publisher", publisher);
-    chatter_pub = nh.advertise<std_msgs::String>(publisher, 1);
+    chatter_pub = nh.advertise<geometry_msgs::Pose>(publisher, 1);
 
     ros::spin();
 

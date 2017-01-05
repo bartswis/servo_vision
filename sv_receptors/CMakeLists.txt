@@ -4,7 +4,7 @@ project(sv_receptors)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  std_msgs
+  geometry_msgs
   tf
   cv_bridge
   image_transport
