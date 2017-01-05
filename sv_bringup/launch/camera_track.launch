@@ -20,15 +20,5 @@
     <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
           args="load image_proc/debayer camera_nodelet_manager">
     </node>
-
-    <node pkg="sv_receptors" type="vr_camera" name="vr_camera_track">
-      <rosparam>
-        subscriber: /camera_track/image_color
-        publisher: track_camera_object_position
-        view: false
-        undistort: false
-      </rosparam>
-    </node>
-
   </group>
 </launch>
