@@ -1,11 +1,12 @@
 #include "ros/ros.h"
-#include "geometry_msgs/Pose.h"
+#include "geometry_msgs/PoseStamped.h"
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <cmath>
 #include <queue>
 #include <vector>
+#include <sv_msg/TimeSeq.h>
 
 static const char WINDOW_WORK[] = "Work";
 static const char WINDOW_ORG[] = "Orginal";
@@ -14,14 +15,15 @@ static const char WINDOW_OUT[] = "Out";
 static bool view = false;
 static bool undistort = false;
 
-ros::Publisher chatter_pub;
+ros::Publisher pub_object;
+ros::Publisher pub_delay;
 double fx, fy, cx, cy;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::CameraInfoConstPtr& info)
 {
     try
     {   
-        geometry_msgs::Pose output;
+        geometry_msgs::PoseStamped pose_out;
 
         fx = info->K[0];
         fy = info->K[4];
@@ -113,13 +115,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
                     if(area > maxArea)
                     {
                         maxArea = area;
-                        output.position.x = dx;
-                        output.position.y = dy;
-                        output.position.z = h;
-                        output.orientation.x = 0;
-                        output.orientation.y = 0;
-                        output.orientation.z = 0;
-                        output.orientation.w = 1;
+                        pose_out.pose.position.x = dx;
+                        pose_out.pose.position.y = dy;
+                        pose_out.pose.position.z = h;
+                        pose_out.pose.orientation.x = 0;
+                        pose_out.pose.orientation.y = 0;
+                        pose_out.pose.orientation.z = 0;
+                        pose_out.pose.orientation.w = 1;
 
                     }
                     //ROS_INFO("circle, M7 = %f , pix_area = %f, pix_x = %f, pix_y = %f, h = %f, dx = %f, dy = %f", M7, area, center.x, center.y, h, dx, dy);
@@ -134,7 +136,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
                 }
             }
         }
-        chatter_pub.publish(output);
+        pose_out.header.frame_id = "32167";
+        pose_out.header.stamp = ros::Time::now();
+        pub_object.publish(pose_out);
+        sv_msg::TimeSeq time_seq;
+        time_seq.stamp = pose_out.header.stamp;
+        time_seq.own_seq = in_msg->header.seq;
+        pub_delay.publish(time_seq);
 
         if (view)
         {
@@ -171,9 +179,13 @@ int main(int argc, char **argv)
     image_transport::ImageTransport it(nh);
     image_transport::CameraSubscriber sub = it.subscribeCamera(subscriber, 1, imageCallback);
 
+    std::string delay;
+    nh.getParam("delay", delay);
+    pub_delay = nh.advertise<sv_msg::TimeSeq>(delay, 1);
+    
     std::string publisher;
     nh.getParam("publisher", publisher);
-    chatter_pub = nh.advertise<geometry_msgs::Pose>(publisher, 1);
+    pub_object = nh.advertise<geometry_msgs::PoseStamped>(publisher, 1);
 
     ros::spin();
 

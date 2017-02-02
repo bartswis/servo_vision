@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   cv_bridge
   image_transport
+  sv_msg
 )
 
 catkin_package(
@@ -20,7 +21,7 @@ include_directories(
 add_executable(vr_camera src/VRCamera.cpp)
 target_link_libraries(vr_camera ${catkin_LIBRARIES})
 
- install(TARGETS vr_camera
+install(TARGETS vr_camera
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
