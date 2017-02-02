@@ -5,7 +5,8 @@
     <node pkg="sv_receptors" type="vr_camera" name="vr_camera_postument">
       <rosparam>
         subscriber: /camera_postument/image_color
-        publisher: postument_camera_object_position
+        publisher: camera_postument_object_position
+        delay: camera_postument_delay
         view: false
         undistort: false
       </rosparam>
@@ -16,9 +17,10 @@
 
     <node pkg="sv_system" type="control_system" name="control_system">
       <rosparam>
-        subscriber: /sv_camera_postument/vr_camera_postument/postument_camera_object_position
-        publisher: object_position
-        visualization_marker: object_marker
+        subscriber: /sv_camera_postument/vr_camera_postument/camera_postument_object_position
+        publisher: system_object_position
+        delay: system_delay
+        visualization_marker: system_object_marker
         marker_frame: world
       </rosparam>
     </node>
