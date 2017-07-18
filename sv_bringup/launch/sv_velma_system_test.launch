@@ -1,0 +1,26 @@
+<launch>
+
+  <group ns="sv_velma_kinect">
+
+    <node pkg="sv_receptors" type="vr_camera_test" name="vr_camera_test_kinect">
+      <rosparam>
+        subscriber: /head_kinect/rgb/image_raw
+        publisher: camera_test_kinect_object_position
+        view: true
+      </rosparam>
+    </node>
+  </group>
+
+  <group ns="sv_control_system">
+
+    <node pkg="sv_system" type="control_system_test" name="control_system">
+      <rosparam>
+        subscriber: /sv_velma_kinect/vr_camera_test_kinect/camera_test_kinect_object_position
+        publisher: system_object_position
+        visualization_marker: system_object_marker
+        marker_frame: world
+      </rosparam>
+    </node>
+  </group>
+
+</launch>
