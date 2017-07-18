@@ -7,7 +7,6 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   tf
   visualization_msgs
-  sv_msg
 )
 
 catkin_package(
@@ -17,10 +16,10 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(control_system src/ControlSystem.cpp)
-target_link_libraries(control_system ${catkin_LIBRARIES})
+add_executable(control_system_test src/CS_test.cpp)
+target_link_libraries(control_system_test ${catkin_LIBRARIES})
 
- install(TARGETS control_system
+ install(TARGETS control_system_test
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

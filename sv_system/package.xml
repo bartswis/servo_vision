@@ -1,6 +1,6 @@
 <package>
   <name>sv_system</name>
-  <version>0.0.1</version>
+  <version>0.0.2</version>
   <description>servo-vision system</description>
   <maintainer email="bartswis@gmail.com">Bartosz Świstak</maintainer>
 
@@ -21,5 +21,4 @@
   <run_depend>rtt_rosnode</run_depend>
   <run_depend>rtt_rostopic</run_depend>
   <run_depend>rtt_rosparam</run_depend> 
-  <run_depend>irpos</run_depend> 
 </package>
