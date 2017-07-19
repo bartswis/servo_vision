@@ -1,11 +1,11 @@
 <launch>
 
-  <group ns="sv_velma_kinect">
+  <group ns="sv_receptors">
 
-    <node pkg="sv_receptors" type="vr_camera_test" name="vr_camera_test_kinect">
+    <node pkg="sv_receptors" type="vr_camera_test" name="vr_camera_kinect">
       <rosparam>
         subscriber: /head_kinect/rgb/image_raw
-        publisher: camera_test_kinect_object_position
+        publisher: ball_position
         view: true
       </rosparam>
     </node>
@@ -15,10 +15,25 @@
 
     <node pkg="sv_system" type="control_system_test" name="control_system">
       <rosparam>
-        subscriber: /sv_velma_kinect/vr_camera_test_kinect/camera_test_kinect_object_position
-        publisher: system_object_position
-        visualization_marker: system_object_marker
+        subscriber: /sv_receptors/vr_camera_kinect/ball_position
+        publisher_pos: ball_position
+        publisher_cmd: look_at_cmd
+        visualization_marker: ball_marker_position
         marker_frame: world
+      </rosparam>
+    </node>
+  </group>
+  
+  <group ns="sv_effectors">
+
+    <node pkg="sv_effectors" type="ve_head_test" name="ve_head_velma">
+      <rosparam>
+        subscriber: /sv_effectors/control_system/look_at_cmd
+      </rosparam>
+    </node>
+    
+    <node pkg="sv_effectors" type="ve_velma_head.py" name="ve_velma_head_srv" output="screen"> 
+      <rosparam>
       </rosparam>
     </node>
   </group>
