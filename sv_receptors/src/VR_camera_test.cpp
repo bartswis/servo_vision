@@ -58,6 +58,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
         double area = 0.0;
         double maxArea = 0.0;
         double minR = 6.0;
+        bool found = false;
 
         for (int i = 0; i < contours.size(); i++)
         {
@@ -89,6 +90,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
 
                     if(area > maxArea)
                     {
+                        found = true;
                         maxArea = area;
                         pose_out.pose.position.x = dx;
                         pose_out.pose.position.y = dy;
@@ -111,10 +113,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
             }
         }
         
-        pose_out.header.frame_id = "32167";
-        pose_out.header.stamp = ros::Time::now();
-        pub_object.publish(pose_out);
-
+        if (found)
+        {
+            pose_out.header.frame_id = "32167";
+            pose_out.header.stamp = ros::Time::now();
+            pub_object.publish(pose_out);
+        }
+        
         if (view)
         {
             cv::imshow(WINDOW_ORG, sourceImage);
