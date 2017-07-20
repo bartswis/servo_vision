@@ -9,10 +9,12 @@ from geometry_msgs.msg import Point
 from sv_effectors.srv import HeadAngles
 
 def handle_moveHead(req):
-    
-    q_dest = (req.alfa,req.beta)
+    js = velma.getLastJointState()
+    head_pan = js[1]["head_pan_joint"]
+    head_tilt = js[1]["head_tilt_joint"]
+    q_dest = (head_pan+req.alfa, head_tilt+req.beta)
     print q_dest
-    velma.moveHead(q_dest, 0.5, start_time=0.1)
+    velma.moveHead(q_dest, 0.1, start_time=0.1)
     velma.waitForHead()
     return 0
 
