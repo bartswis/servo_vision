@@ -28,7 +28,8 @@
 
     <node pkg="sv_effectors" type="ve_head_test" name="ve_head_velma">
       <rosparam>
-        subscriber: /sv_effectors/control_system/look_at_cmd
+        subscriber: /sv_control_system/control_system/look_at_cmd
+        service: /sv_effectors/moveHead
       </rosparam>
     </node>
     
