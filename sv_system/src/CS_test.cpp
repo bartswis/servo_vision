@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "visualization_msgs/Marker.h"
 #include "geometry_msgs/PoseStamped.h"
-#include "geometry_msgs/Point.h"
+#include "geometry_msgs/Pose.h"
 #include "tf2_ros/transform_listener.h" 
 #include "tf/transform_datatypes.h"
 #include <cmath>
@@ -35,8 +35,8 @@
         pub_position.publish(world_object_pose);
         
         // TODO object position plus movement
-        geometry_msgs::Point look_at_point;
-        look_at_point = world_object_pose.pose.position;
+        geometry_msgs::Pose look_at_point;
+        look_at_point = world_object_pose.pose;
         pub_look_at.publish(look_at_point);
 
         uint32_t shape = visualization_msgs::Marker::SPHERE;
@@ -75,13 +75,14 @@ int main(int argc, char **argv)
     
     std::string publisher_cmd;
     nh.getParam("publisher_cmd", publisher_cmd);
-    pub_look_at = nh.advertise<geometry_msgs::Point>(publisher_cmd, 1);
+    pub_look_at = nh.advertise<geometry_msgs::Pose>(publisher_cmd, 1);
 
     std::string subscriber;
     nh.getParam("subscriber", subscriber);
     ros::Subscriber sub = nh.subscribe(subscriber, 1, controlCallback);
 
     tfListener = new tf2_ros::TransformListener(tfBuffer);
+    ros::Duration(1).sleep();
 
     ros::spin();
 }
