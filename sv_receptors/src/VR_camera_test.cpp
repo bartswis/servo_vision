@@ -16,7 +16,8 @@ static bool view = false;
 ros::Publisher pub_object;
 double fx, fy, cx, cy;
 
-void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::CameraInfoConstPtr& info)
+void imageCallback(const sensor_msgs::ImageConstPtr& in_msg)
+//void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::CameraInfoConstPtr& info)
 {
     try
     {   
@@ -25,13 +26,19 @@ void imageCallback(const sensor_msgs::ImageConstPtr& in_msg, const sensor_msgs::
         cv_bridge::CvImagePtr cv_ptr = cv_bridge::toCvCopy(in_msg, "bgr8"  );
         cv::Mat sourceImage = cv_ptr->image.clone();
 
+        fx = 554.382713;
+        fy = 554.382713;
+        cx = 320.500000;
+        cy = 240.500000;
         
+        /*
         fx = info->K[0];
         fy = info->K[4];
         cx = info->K[2];
         cy = info->K[5];
         
-        
+        ROS_ERROR("fx '%f' ; fy '%f' ; cx '%f' ; cy '%f'", fx, fy, cx, cy);
+        */
         cv::Mat grayImage;
         cv::Mat thresholdImage;
         cv::Mat erodeImage;
@@ -152,7 +159,8 @@ int main(int argc, char **argv)
     std::string subscriber;
     nh.getParam("subscriber", subscriber);
     image_transport::ImageTransport it(nh);
-    image_transport::CameraSubscriber sub = it.subscribeCamera(subscriber, 1, imageCallback);
+    image_transport::Subscriber sub = it.subscribe(subscriber, 1, imageCallback);
+    //image_transport::CameraSubscriber sub = it.subscribeCamera(subscriber, 1, imageCallback);
     
     std::string publisher;
     nh.getParam("publisher", publisher);
