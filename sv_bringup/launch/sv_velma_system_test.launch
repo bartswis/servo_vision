@@ -22,6 +22,17 @@
         marker_frame: world
       </rosparam>
     </node>
+    
+    <node pkg="sv_bringup" type="markers.py" name="markers">
+      <rosparam>
+      </rosparam>
+    </node>
+    
+    <node pkg="sv_bringup" type="path.py" name="path">
+      <rosparam>
+      </rosparam>
+    </node>
+    
   </group>
   
   <group ns="sv_effectors">
@@ -33,7 +44,7 @@
       </rosparam>
     </node>
     
-    <node pkg="sv_effectors" type="ve_velma_head.py" name="ve_velma_head_srv" output="screen"> 
+    <node pkg="sv_effectors" type="ve_velma_head.py" name="ve_velma_head_srv" output="screen">
       <rosparam>
       </rosparam>
     </node>

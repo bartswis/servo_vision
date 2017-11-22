@@ -13,11 +13,16 @@ catkin_package(
 )
 
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+  include
+  ${catkin_INCLUDE_DIRS} 
 )
 
+FILE(GLOB LIB_SRC_FILES "src/lib/*.cpp")
+
+add_library(sv_system_lib ${LIB_SRC_FILES})
+
 add_executable(control_system_test src/CS_test.cpp)
-target_link_libraries(control_system_test ${catkin_LIBRARIES})
+target_link_libraries(control_system_test ${catkin_LIBRARIES} sv_system_lib)
 
  install(TARGETS control_system_test
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
