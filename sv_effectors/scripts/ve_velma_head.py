@@ -5,7 +5,8 @@ import rospy
 import tf
 
 from velma_common.velma_interface import *
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Vector3Stamped
+from std_msgs.msg import Header
 from sv_effectors.srv import HeadAngles
 
 def handle_moveHead(req):
@@ -13,9 +14,26 @@ def handle_moveHead(req):
     head_pan = js[1]["head_pan_joint"]
     head_tilt = js[1]["head_tilt_joint"]
     q_dest = (head_pan+req.alfa, head_tilt+req.beta)
-    print q_dest
-    velma.moveHead(q_dest, 0.1, start_time=0.1)
-    velma.waitForHead()
+    #print q_dest
+    
+    header = std_msgs.msg.Header()
+    header.stamp = rospy.Time.now()
+    
+    state = geometry_msgs.msg.Vector3Stamped()
+    state.vector.x = head_pan
+    state.vector.y = head_tilt
+    state.header = header
+    
+    destination = geometry_msgs.msg.Vector3Stamped()
+    destination.vector.x = head_pan+req.alfa
+    destination.vector.y = head_tilt+req.beta
+    destination.header = header
+    
+    publish_head_state.publish(state)
+    publish_head_destination.publish(destination)
+    
+    velma.moveHead(q_dest, 0.02, start_time=0)
+    
     return 0
 
 if __name__ == "__main__":
@@ -55,5 +73,9 @@ if __name__ == "__main__":
 
     print "Start"
     rospy.Service('moveHead', HeadAngles, handle_moveHead)
+    
+    publish_head_state = rospy.Publisher('head_state', Vector3Stamped, queue_size=1)
+    publish_head_destination = rospy.Publisher('head_destination', Vector3Stamped, queue_size=1)
+    
     rospy.spin()
 
