@@ -22,7 +22,7 @@ if __name__ == '__main__':
         product_xml = f.read()
         
     ball_pose = Pose()
-    ball_pose.position.x = 1.0
+    ball_pose.position.x = 0.75
     ball_pose.position.y = 0.0
     ball_pose.position.z = 1.5
     ball_pose.orientation.x = 0
